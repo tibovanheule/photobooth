@@ -217,7 +217,7 @@ def returnCameraIndexes():
     return arr
 
 def other_process(worklist):
-    sleep_timer = 0
+
     while 'QUIT' not in worklist:
         if len(worklist) > 0:
             fname = worklist.pop()
@@ -229,9 +229,6 @@ def other_process(worklist):
             requests.post("http://localhost:3356/image",json={"image":b64_string})
         else:
             time.sleep(1)
-            sleep_timer += 1
-            #if sleep_timer > 10000:
-            #    login_google(state)
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser(
