@@ -3,12 +3,25 @@ let app = express();
 let path = require('path');
 let logger = require('morgan');
 const dotenv = require('dotenv');
-let indexRouter = require('./routes/index');
-let imageRouter = require('./routes/image');
-const socketIO = require('socket.io');
+const fs = require('fs');
+
 const http = require('http');
 let server = http.createServer(app);
-let io = socketIO(server);
+app.set("view engine", "ejs");
+
+app.use(express.static(path.join(__dirname, 'public')));
+
+app.use(function (req, res, next) {
+    if (req.url.startsWith("css")) {
+        req.url = "public/" + req.url;
+    }
+
+    if (req.url.startsWith("img")) {
+        req.url = "public/" + req.url;
+    }
+
+    next();
+});
 // Set up Global configuration access
 dotenv.config();
 let port = 3356;
@@ -16,29 +29,31 @@ let port = 3356;
 server.listen(port, () => {
     console.log(`Success! Your application is running on port ${port}.`);
 });
-io.on( 'connection', async function( socket ) {
-    console.log( 'a user has connected!' );
-    try {
-        let data = {}
-        socket.emit('update-event', data);
-    } catch (err) {
-        console.log(err);
-    }
-    socket.on( 'disconnect', function() {
-    console.log( 'user disconnected' );
-    });
-});
-
-app.use((req, res, next) => {
-    req.io = io;
-    return next();
-  });
 
 dotenv.config();
 app.use(logger('dev'));
-app.use(express.json({limit:'50mb'}));
+app.use(express.json({ limit: '50mb' }));
 app.use(express.urlencoded({ extended: false }));
 app.use(express.static(path.join(__dirname, 'public')));
 
-app.use('/', indexRouter);
-app.use('/image', imageRouter);
+app.get("/", function (req, res,next) {
+    try {
+        let image = fs.readFileSync("image.png", 'base64');
+        res.render("index", { image: image });
+    } catch (err) {
+        res.status(500).send({ success: false, err: err });
+        next(err);
+    }
+});
+
+app.post("/image", async (req, res, next) => {
+    try {
+        let base64image = req.body.image;
+        
+        fs.writeFile("image.png", base64image, 'base64', function(err) {});
+        res.send({ success: true });
+    } catch (err) {
+        res.status(500).send({ success: false, err: err });
+        next(err);
+    }
+});
