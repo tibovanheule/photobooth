@@ -226,7 +226,7 @@ def other_process(worklist):
             img = cv2.imread(fname)
             jpg_img = cv2.imencode('.jpg', img, [int(cv2.IMWRITE_JPEG_QUALITY), 90])
             b64_string = base64.b64encode(jpg_img[1]).decode('utf-8')
-            requests.post("http://localhost:3356/image",json={"image":b64_string})
+            requests.post("https://homekonvent.be/photobooth/image",json={"image":b64_string})
         else:
             time.sleep(1)
 
