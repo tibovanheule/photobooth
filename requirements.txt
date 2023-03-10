@@ -1,2 +1,4 @@
 wheel
 opencv-python
+requests
+pillow
